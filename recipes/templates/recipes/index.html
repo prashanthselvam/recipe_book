@@ -1,0 +1,12 @@
+{% extends 'recipes/base.html' %}
+
+{% block content %}
+
+<h3>Welcome to the recipe book application!</h3>
+<p>Here you can store your recipes and revisit them at any time!</p>
+
+<br><br>
+
+<p><a href="{% url 'recipes:recipes' %}">View Recipes</a></p>
+<p><a href="{% url 'recipes:new_recipe' %}">Add New Recipe</a></p>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "recipes/base.html" %}
+
+{% block header %}
+<h2>{{ recipe }}</h2>
+{% endblock header %}
+
+
+{% block content %}
+
+<img src="{{ recipe.img_url }}" width="400">
+
+<br><br>
+
+<p>{{ recipe.description }}</p>
+
+<br><br>
+
+<ol>
+    {% for step in recipe.steps %}
+    <li>{{ step }}</li>
+    {% endfor %}
+</ol>
+
+<br><br>
+
+<p>Source URl: <a href="{{ recipe.source_url }}">{{ recipe.source_url }}</a></p>
+
+
+{% endblock content %}

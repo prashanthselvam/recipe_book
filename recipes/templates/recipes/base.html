@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+  </head>
+  <body>
+  <!-- Static Navbar -->
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container" style="width:100%">
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed"
+            data-toggle="collapse" data-target="#navbar"
+            aria-expanded="false" aria-controls="navbar">
+          </button>
+          <a class="navbar-brand" href="{% url 'recipes:index' %}">Recipe Book</a>
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="{% url 'recipes:recipes' %}">Recipes</a></li>
+          </ul>
+
+        </div><!--/.nav-collapse-->
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        {% block header %}{% endblock header %}
+      </div>
+      <div>
+        {% block content %}{% endblock content %}
+      </div>
+
+    </div> <!--/container-->
+  </body>
+</html>

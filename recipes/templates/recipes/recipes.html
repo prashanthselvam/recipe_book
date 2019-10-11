@@ -1,0 +1,16 @@
+{% extends 'recipes/base.html' %}
+
+{% block content %}
+
+  <ul>
+    {% for recipe in recipes %}
+      <li>
+        <img src="{{ recipe.img_url }}" alt="{{ recipe }}" height="100" width="100">
+        <h4><a href="{% url 'recipes:recipe_detail' recipe.id %}">{{ recipe }}</a></h4>
+      </li>
+    {% empty %}
+      <li>No recipes have been added yet.</li>
+    {% endfor %}
+  </ul>
+
+{% endblock %}
