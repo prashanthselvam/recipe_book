@@ -23,8 +23,9 @@ def recipes(request):
 
 def new_recipe(request):
     """You can add a new recipe on this page"""
+    # Question for Ernesto: Is it better to do the inlineformset stuff here or in the forms code?
     recipe_form = RecipeForm()
-    recipesteps_formset = inlineformset_factory(Recipe, RecipeSteps, fields=('step_text', ), can_delete=False, extra=5)
+    recipesteps_formset = inlineformset_factory(Recipe, RecipeSteps, fields=('step_text', ), can_delete=False)
 
     if request.method == 'POST':
         recipe_form = RecipeForm(request.POST)
