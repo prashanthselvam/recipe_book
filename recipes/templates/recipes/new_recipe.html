@@ -4,7 +4,8 @@
 
     <form action="{% url 'recipes:new_recipe' %}" method="post">
         {% csrf_token %}
-        <table>{{ form.as_table }}</table>
+        <table>{{ recipe_form.as_table }}</table>
+        <table>{{ recipesteps_formset.as_table }}</table>
         <input type="submit" value="Submit">
     </form>
 

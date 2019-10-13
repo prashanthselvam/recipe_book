@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.forms import modelformset_factory, inlineformset_factory
 
-from .models import Recipe
-from .forms import RecipeForm
+from .models import Recipe, RecipeSteps
+from .forms import RecipeForm, RecipeStepsForm
 
 # Create your views here.
 
@@ -22,26 +23,34 @@ def recipes(request):
 
 def new_recipe(request):
     """You can add a new recipe on this page"""
+    recipe_form = RecipeForm()
+    recipesteps_formset = inlineformset_factory(Recipe, RecipeSteps, fields=('step_text', ), can_delete=False, extra=5)
+
     if request.method == 'POST':
-        form = RecipeForm(request.POST)
-        if form.is_valid():
-            recipe = form.save(commit=False)
-            recipe.steps = recipe.steps.split('\r\n\r\n')
-            recipe.save()
+        recipe_form = RecipeForm(request.POST)
+
+        if recipe_form.is_valid():
+            recipe = recipe_form.save()
+
+        formset = recipesteps_formset(request.POST, instance=recipe)
+        if formset.is_valid():
+            recipesteps = formset.save(commit=False)
+            i = 1
+            for step in recipesteps:
+                step.recipe = recipe
+                step.step_number = i
+                i += 1
+                step.save()
+
             return HttpResponseRedirect(reverse('recipes:recipes'))
 
-    else:
-        form = RecipeForm()
-
-    context = {'form': form}
+    context = {'recipe_form': recipe_form, 'recipesteps_formset': recipesteps_formset}
     return render(request, 'recipes/new_recipe.html', context)
 
 
 def recipe_detail(request, recipe_id):
     """View a specific recipe on this page"""
     recipe = Recipe.objects.get(id=recipe_id)
-    steps = recipe.steps.split('\r\n\r\n')
-    recipe.steps = steps
 
     context = {'recipe': recipe}
     return render(request, 'recipes/recipe_detail.html', context)

@@ -1,7 +1,7 @@
 {% extends "recipes/base.html" %}
 
 {% block header %}
-<h2>{{ recipe }}</h2>
+<h2>{{ recipe.title }}</h2>
 {% endblock header %}
 
 
@@ -15,11 +15,6 @@
 
 <br><br>
 
-<ol>
-    {% for step in recipe.steps %}
-    <li>{{ step }}</li>
-    {% endfor %}
-</ol>
 
 <br><br>
 

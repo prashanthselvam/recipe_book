@@ -1,11 +1,17 @@
 from django import forms
-from .models import Recipe
+from .models import Recipe, RecipeSteps
 
 
 class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
-        fields = ['title', 'description', 'steps', 'source_url', 'img_url']
+        fields = ['title', 'description', 'ingredients', 'source_url', 'img_url']
+
+
+class RecipeStepsForm(forms.ModelForm):
+    class Meta:
+        model = RecipeSteps
+        fields = ['step_text']
 
 
     # title = forms.CharField(label='Recipe Name', max_length=100)
