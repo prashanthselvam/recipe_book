@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # My Apps
-    'recipes'
+    'recipes',
+    'crispy_forms',
+    'django.forms'
 ]
 
 MIDDLEWARE = [
@@ -120,3 +122,4 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join('static'), )
 
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'

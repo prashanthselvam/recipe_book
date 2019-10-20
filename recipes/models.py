@@ -13,7 +13,8 @@ class Recipe(models.Model):
     title = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
-    ingredients = models.ManyToManyField(Ingredient)
+    # ingredients = models.ManyToManyField(Ingredient)
+    ingredient_quantity = models.TextField()
     source_url = models.URLField()
     img_url = models.URLField()
 
