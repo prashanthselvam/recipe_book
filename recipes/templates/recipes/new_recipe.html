@@ -6,7 +6,7 @@
 
 <h2>Create New Recipe</h2>
     <hr>
-    <h4>Recipe Details:</h4>
+    <h4>Recipe Details</h4>
     <form method="post">
     {% csrf_token %}
 
@@ -31,7 +31,7 @@
         </div>
 
     <hr>
-    <h4>Ingredients:</h4>
+    <h4>Ingredients</h4>
 
     {{ ingredients_formset.management_form }}
     {% for ingredients_form in ingredients_formset %}
@@ -54,6 +54,14 @@
         </div>
     {% endfor %}
 
+        <datalist id="ingredientslist">
+
+            {% for ingredient in ingredientslist %}
+            <option>{{ ingredient }}</option>
+            {% endfor %}
+
+        </datalist>
+
     {% if ingredients_formset.non_form_errors %}
         {% for error in ingredients_formset.non_form_errors %}
             {{ error|escape }}
@@ -61,7 +69,7 @@
     {% endif %}
 
     <hr>
-    <h4>Steps:</h4>
+    <h4>Steps</h4>
 
     {{ recipesteps_formset.management_form }}
     {% for form in recipesteps_formset %}

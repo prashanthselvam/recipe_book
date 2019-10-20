@@ -3,6 +3,7 @@ from django.db import models
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=100)
+    date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -13,7 +14,7 @@ class Recipe(models.Model):
     title = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
-    # ingredients = models.ManyToManyField(Ingredient)
+    ingredients = models.ManyToManyField(Ingredient)
     ingredient_quantity = models.TextField()
     source_url = models.URLField()
     img_url = models.URLField()

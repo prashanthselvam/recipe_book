@@ -3,10 +3,10 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.forms import modelformset_factory, inlineformset_factory, formset_factory
+from django.forms import inlineformset_factory, formset_factory
 
 from .models import Recipe, RecipeSteps, Ingredient
-from .forms import RecipeForm, IngredientsForm
+from .forms import RecipeForm, IngredientsForm, RecipeStepsForm
 
 
 def index(request):
@@ -32,8 +32,10 @@ def recipe_detail(request, recipe_id):
 
 def new_recipe(request):
     """Create a new recipe on this page"""
+    # We're using formsets here to display multiple forms (since we can have multiple steps/ingredients
+
     IngredientsFormSet = formset_factory(IngredientsForm)
-    RecipeStepsFormSet = inlineformset_factory(Recipe, RecipeSteps, fields=('step_text',), can_delete=False)
+    RecipeStepsFormSet = inlineformset_factory(Recipe, RecipeSteps, form=RecipeStepsForm, fields=('step_text',), can_delete=False)
 
     if request.method == 'POST':
         ingredients_formset = IngredientsFormSet(request.POST)
@@ -41,17 +43,27 @@ def new_recipe(request):
 
         if recipe_form.is_valid():
 
-            recipe = recipe_form.save(commit=False)
+            recipe = recipe_form.save()
 
             if ingredients_formset.is_valid():
 
                 ingredient_quantity_pairs = []
+                existing_ingredients = [ingredient.name for ingredient in Ingredient.objects.all()]
 
                 for ingredient_form in ingredients_formset:
-                    ingredient = ingredient_form.cleaned_data.get('ingredient')
-                    quantity = ingredient_form.cleaned_data.get('quantity')
+                    if ingredient_form.cleaned_data.get('ingredient') is not None:
+                        ingredient = ingredient_form.cleaned_data.get('ingredient').title()
+                        quantity = ingredient_form.cleaned_data.get('quantity').title()
 
-                    ingredient_quantity_pairs.append({'ingredient': ingredient, 'quantity': quantity})
+                        if ingredient in existing_ingredients:
+                            ingredient_model = Ingredient.objects.get(name=ingredient)
+                        else:
+                            ingredient_model = Ingredient(name=ingredient)
+                            ingredient_model.save()
+
+                        recipe.ingredients.add(ingredient_model)
+
+                        ingredient_quantity_pairs.append({'ingredient': ingredient, 'quantity': quantity})
 
                 recipe.ingredient_quantity = json.dumps(ingredient_quantity_pairs)
                 recipe.save()
@@ -76,10 +88,13 @@ def new_recipe(request):
         ingredients_formset = IngredientsFormSet()
         recipesteps_formset = RecipeStepsFormSet()
 
+        ingredientslist = [ingredient.name for ingredient in Ingredient.objects.all()]
+
     context = {
         'recipe_form': recipe_form,
         'ingredients_formset': ingredients_formset,
-        'recipesteps_formset': recipesteps_formset
+        'recipesteps_formset': recipesteps_formset,
+        'ingredientslist': ingredientslist
     }
 
     return render(request, 'recipes/new_recipe.html', context)
