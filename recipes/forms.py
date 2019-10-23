@@ -12,7 +12,7 @@ class RecipeStepsForm(forms.ModelForm):
     class Meta:
         model = RecipeSteps
         fields = ['step_text']
-        widgets = {'step_text': forms.Textarea(attrs={'rows': 1, 'cols': 40})}
+        widgets = {'step_text': forms.Textarea(attrs={'rows': 4, 'cols': 80})}
 
 
 class IngredientsForm(forms.Form):
@@ -21,7 +21,8 @@ class IngredientsForm(forms.Form):
         max_length=200,
         widget=forms.TextInput(attrs={
             'class': 'awesomplete',
-            'list': 'ingredientslist'
+            'list': 'ingredientslist',
+            'autocomplete': 'false'
         })
     )
 

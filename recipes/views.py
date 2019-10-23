@@ -1,12 +1,18 @@
 import json
 
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.forms import inlineformset_factory, formset_factory
 
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
+
 from .models import Recipe, RecipeSteps, Ingredient
 from .forms import RecipeForm, IngredientsForm, RecipeStepsForm
+from .serializers import RecipeSerializer
 
 
 def index(request):
@@ -98,3 +104,25 @@ def new_recipe(request):
     }
 
     return render(request, 'recipes/new_recipe.html', context)
+
+
+@api_view(['GET'])
+def api_recipe_list(request, format=None):
+    """List all recipes in the app via API"""
+    if request.method == 'GET':
+        recipes = Recipe.objects.all()
+        serializer = RecipeSerializer(recipes, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+def api_recipe_detail(request, pk, format=None):
+    """Get details on a particular recipe ID"""
+    try:
+        recipe = Recipe.objects.get(pk=pk)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = RecipeSerializer(recipe)
+        return Response(serializer.data)
