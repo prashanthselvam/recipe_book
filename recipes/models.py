@@ -14,8 +14,7 @@ class Recipe(models.Model):
     title = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
-    ingredients = models.ManyToManyField(Ingredient)
-    ingredient_quantity = models.TextField()
+    ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
     source_url = models.URLField()
     img_url = models.URLField()
 
@@ -27,7 +26,21 @@ class Recipe(models.Model):
         return self.title
 
 
-class RecipeSteps(models.Model):
+class RecipeIngredient(models.Model):
+    """A custom through model for recording recipes and the ingredients they use along with quantities"""
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    ingredient_quantity = models.CharField(max_length=42)
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-date_added',)
+
+    def __str__(self):
+        return str(self.recipe.title) + '_' + str(self.ingredient.name)
+
+
+class RecipeStep(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     date_added = models.DateTimeField(auto_now_add=True)
     step_number = models.IntegerField()

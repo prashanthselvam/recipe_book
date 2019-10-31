@@ -5,8 +5,8 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 
 urlpatterns = [
-  # Home Page
-  path('', views.index, name='index'),
+  # Home Page (Directs to recipes page)
+  path('', views.recipes, name='index'),
 
   # Recipes Page
   path('recipes/', views.recipes, name='recipes'),

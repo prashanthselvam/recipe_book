@@ -10,8 +10,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 
-from .models import Recipe, RecipeSteps, Ingredient
-from .forms import RecipeForm, IngredientsForm, RecipeStepsForm
+from .models import Recipe, Ingredient, RecipeStep, RecipeIngredient
+from .forms import RecipeForm, IngredientsForm, RecipeStepForm
 from .serializers import RecipeSerializer
 
 
@@ -27,12 +27,23 @@ def recipes(request):
     return render(request, 'recipes/recipes.html', context)
 
 
+@api_view(['GET'])
+def api_recipe_list(request, format=None):
+    """List all recipes in the app via API"""
+    if request.method == 'GET':
+        recipes = Recipe.objects.all()
+        serializer = RecipeSerializer(recipes, many=True)
+        return Response(serializer.data)
+
+
+
 def recipe_detail(request, recipe_id):
     """View a specific recipe on this page"""
     recipe = Recipe.objects.get(id=recipe_id)
-    steps = RecipeSteps.objects.filter(recipe__pk=recipe.id)
+    steps = RecipeStep.objects.filter(recipe=recipe)
+    ingredients = RecipeIngredient.objects.filter(recipe=recipe)
 
-    context = {'recipe': recipe, 'steps': steps}
+    context = {'recipe': recipe, 'steps': steps, 'ingredients': ingredients}
     return render(request, 'recipes/recipe_detail.html', context)
 
 
@@ -41,11 +52,12 @@ def new_recipe(request):
     # We're using formsets here to display multiple forms (since we can have multiple steps/ingredients
 
     IngredientsFormSet = formset_factory(IngredientsForm)
-    RecipeStepsFormSet = inlineformset_factory(Recipe, RecipeSteps, form=RecipeStepsForm, fields=('step_text',), can_delete=False)
+    RecipeStepFormSet = formset_factory(RecipeStepForm)
 
     if request.method == 'POST':
-        ingredients_formset = IngredientsFormSet(request.POST)
-        recipe_form = RecipeForm(request.POST)
+
+        ingredients_formset = IngredientsFormSet(data=request.POST, prefix='ingredient_form')
+        recipe_form = RecipeForm(data=request.POST)
 
         if recipe_form.is_valid():
 
@@ -53,7 +65,6 @@ def new_recipe(request):
 
             if ingredients_formset.is_valid():
 
-                ingredient_quantity_pairs = []
                 existing_ingredients = [ingredient.name for ingredient in Ingredient.objects.all()]
 
                 for ingredient_form in ingredients_formset:
@@ -61,58 +72,37 @@ def new_recipe(request):
                         ingredient = ingredient_form.cleaned_data.get('ingredient').title()
                         quantity = ingredient_form.cleaned_data.get('quantity').title()
 
-                        if ingredient in existing_ingredients:
-                            ingredient_model = Ingredient.objects.get(name=ingredient)
+                        if ingredient not in existing_ingredients:
+                            ingredient = Ingredient.objects.create(name=ingredient)
                         else:
-                            ingredient_model = Ingredient(name=ingredient)
-                            ingredient_model.save()
+                            ingredient = Ingredient.objects.get(name=ingredient)
 
-                        recipe.ingredients.add(ingredient_model)
+                        RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient, ingredient_quantity=quantity)
 
-                        ingredient_quantity_pairs.append({'ingredient': ingredient, 'quantity': quantity})
+                recipestep_formset = RecipeStepFormSet(data=request.POST, prefix='recipestep_form')
 
-                recipe.ingredient_quantity = json.dumps(ingredient_quantity_pairs)
-                recipe.save()
+                if recipestep_formset.is_valid():
 
-                recipesteps_formset = RecipeStepsFormSet(request.POST, instance=recipe)
+                    for step_number, step in enumerate(recipestep_formset, start=1):
+                        step_text = step.cleaned_data.get('step_text')
+                        RecipeStep.objects.create(recipe=recipe, step_number=step_number, step_text=step_text)
 
-                if recipesteps_formset.is_valid():
-
-                    recipesteps = recipesteps_formset.save(commit=False)
-                    i = 1
-
-                    for step in recipesteps:
-                        step.recipe = recipe
-                        step.step_number = i
-                        i += 1
-                        step.save()
-
-                    return HttpResponseRedirect(reverse('recipes:recipes'))
+                return HttpResponseRedirect(reverse('recipes:recipes'))
 
     else:
         recipe_form = RecipeForm()
-        ingredients_formset = IngredientsFormSet()
-        recipesteps_formset = RecipeStepsFormSet()
-
+        ingredients_formset = IngredientsFormSet(prefix='ingredient_form')
+        recipestep_formset = RecipeStepFormSet(prefix='recipestep_form')
         ingredientslist = [ingredient.name for ingredient in Ingredient.objects.all()]
 
     context = {
         'recipe_form': recipe_form,
         'ingredients_formset': ingredients_formset,
-        'recipesteps_formset': recipesteps_formset,
+        'recipestep_formset': recipestep_formset,
         'ingredientslist': ingredientslist
     }
 
     return render(request, 'recipes/new_recipe.html', context)
-
-
-@api_view(['GET'])
-def api_recipe_list(request, format=None):
-    """List all recipes in the app via API"""
-    if request.method == 'GET':
-        recipes = Recipe.objects.all()
-        serializer = RecipeSerializer(recipes, many=True)
-        return Response(serializer.data)
 
 
 @api_view(['GET'])

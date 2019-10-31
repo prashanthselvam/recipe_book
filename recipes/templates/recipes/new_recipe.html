@@ -4,85 +4,106 @@
 
 {% block content %}
 
-<h2>Create New Recipe</h2>
-    <hr>
-    <h4>Recipe Details</h4>
-    <form method="post">
-    {% csrf_token %}
-
-        <div>
-            <label>Title: </label>
-            {{ recipe_form.title }}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 recipe-title">
+            <h1 class="display-6">Create New Recipe</h1>
         </div>
+        <div class="col-10 offset-1">
+            <hr style="margin-top:-10px; margin-bottom:40px">
+            <h4>Recipe Details</h4>
+            <form action="{% url 'recipes:new_recipe' %}" method="post">
+            {% csrf_token %}
 
-        <div>
-            <label>Description: </label>
-            {{ recipe_form.description }}
-        </div>
+            <div>
+                <label>Title: </label>
+                {{ recipe_form.title }}
+            </div>
 
-        <div>
-            <label>Source URL: </label>
-            {{ recipe_form.source_url }}
-        </div>
+            <div>
+                <label>Description: </label>
+                {{ recipe_form.description }}
+            </div>
 
-        <div>
-            <label>Image URL: </label>
-            {{ recipe_form.img_url }}
-        </div>
+            <div>
+                <label>Source URL: </label>
+                {{ recipe_form.source_url }}
+            </div>
 
-    <hr>
-    <h4>Ingredients</h4>
+            <div>
+                <label>Image URL: </label>
+                {{ recipe_form.img_url }}
+            </div>
 
-    {{ ingredients_formset.management_form }}
-    {% for ingredients_form in ingredients_formset %}
-        <div class="ingredients-formset">
-            <label>Ingredient: </label>
-            {{ ingredients_form.ingredient }}
-            {% if ingredients_form.ingredient.errors %}
-                {% for error in ingredients_form.ingredient.errors %}
-                    {{ error|escape }}
-                {% endfor %}
-            {% endif %}
+            <hr style="margin-top:30px; margin-bottom:40px">
 
-            <label>Quantity: </label>
-            {{ ingredients_form.quantity }}
-            {% if ingredients_form.quantity.errors %}
-                {% for error in ingredients_form.quantity.errors %}
-                    {{ error|escape }}
-                {% endfor %}
-            {% endif %}
-        </div>
-    {% endfor %}
+            <h4>Ingredients</h4>
 
-        <datalist id="ingredientslist">
+            {{ ingredients_formset.management_form }}
+            {% for ingredients_form in ingredients_formset %}
+            <div class="ingredients-formset">
+                <label>Ingredient: </label>
+                {{ ingredients_form.ingredient }}
+                {% if ingredients_form.ingredient.errors %}
+                    {% for error in ingredients_form.ingredient.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
 
-            {% for ingredient in ingredientslist %}
-            <option>{{ ingredient }}</option>
+                <label>Quantity: </label>
+                {{ ingredients_form.quantity }}
+                {% if ingredients_form.quantity.errors %}
+                    {% for error in ingredients_form.quantity.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
+            </div>
             {% endfor %}
 
-        </datalist>
+            <datalist id="ingredientslist">
 
-    {% if ingredients_formset.non_form_errors %}
-        {% for error in ingredients_formset.non_form_errors %}
-            {{ error|escape }}
-        {% endfor %}
-    {% endif %}
+                {% for ingredient in ingredientslist %}
+                <option>{{ ingredient }}</option>
+                {% endfor %}
 
-    <hr>
-    <h4>Steps</h4>
+            </datalist>
 
-    {{ recipesteps_formset.management_form }}
-    {% for form in recipesteps_formset %}
+            {% if ingredients_formset.non_form_errors %}
+                {% for error in ingredients_formset.non_form_errors %}
+                    {{ error|escape }}
+                {% endfor %}
+            {% endif %}
 
-        <div class="recipesteps-formset">
-            <label>Step: </label>
-            {{ form.step_text }}
-        </div>
-    {% endfor %}
+            <hr style="margin-top:30px; margin-bottom:40px">
 
-        <br>
-    <input type="submit" value="Save" class="button"/>
-</form>
+            <h4>Steps</h4>
+
+            {{ recipestep_formset.management_form }}
+            {% for recipestep_form in recipestep_formset %}
+            <div class="recipestep-formset">
+                <label>Step: </label>
+                {{ recipestep_form.step_text }}
+                {% if recipestep_form.step_text.errors %}
+                    {% for error in recipestep_form.step_text.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
+
+            </div>
+            {% endfor %}
+
+
+            <div class="col-12" style="text-align:center">
+
+                <input type="submit" value="Save Recipe" class="btn btn-success save-recipe-btn"/>
+
+            </div>
+
+            </form>
+
+            </div>
+    </div>
+</div>
 
 
 <!-- Include formset plugin - including jQuery dependency -->
@@ -91,11 +112,13 @@
 <script>
     $('.ingredients-formset').formset({
         addText: 'Add Ingredient',
-        deleteText: 'Remove'
+        deleteText: 'Remove',
+        prefix: 'ingredient_form'
     })
 
-    $('.recipesteps-formset').formset({
-        addText: 'Add Step'
+    $('.recipestep-formset').formset({
+        addText: 'Add Step',
+        prefix: 'recipestep_form'
     });
 </script>
 

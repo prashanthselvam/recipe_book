@@ -1,27 +1,41 @@
 {% extends "recipes/base.html" %}
 
-{% block header %}
-<h2>{{ recipe.title }}</h2>
-{% endblock header %}
-
-
 {% block content %}
 
-<img src="{{ recipe.img_url }}" width="400">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 recipe-title">
+            <h1 class="display-6">{{ recipe.title }}</h1>
+            <p>Date Added: {{ recipe.date_added }}</p>
+            <hr style="width:80%">
+        </div>
+        <div class="col-md-12 col-lg-6 offset-lg-3">
+            <img class="recipe-img" src="{{ recipe.img_url }}">
+            <br>
+            <hr>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <h3 class="display-6">Ingredients:</h3>
+            <br>
+            <ul>
+                {% for ingredient in ingredients %}
+                <li>{{ ingredient.ingredient.name }} - {{ ingredient.ingredient_quantity }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-8">
+            <h3 class="display-6">Steps:</h3>
+            <br>
+            {% for step in steps %}
+            <p><b>{{ step.step_number }}: </b>{{ step.step_text }}</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
-<br><br>
 
-<p>{{ recipe.description }}</p>
-
-<br><br>
-
-{% for step in steps %}
-    <p><b>Step {{ step.step_number }}: </b>{{ step.step_text }}</p>
-{% endfor %}
-
-<br><br>
-
-<p>Source URl: <a href="{{ recipe.source_url }}">{{ recipe.source_url }}</a></p>
 
 
 {% endblock content %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Recipe, RecipeSteps, Ingredient
+from .models import Recipe, RecipeStep, Ingredient
 
 
 class RecipeForm(forms.ModelForm):
@@ -8,11 +8,18 @@ class RecipeForm(forms.ModelForm):
         fields = ['title', 'description', 'source_url', 'img_url']
 
 
-class RecipeStepsForm(forms.ModelForm):
-    class Meta:
-        model = RecipeSteps
-        fields = ['step_text']
-        widgets = {'step_text': forms.Textarea(attrs={'rows': 4, 'cols': 80})}
+# class RecipeStepForm(forms.ModelForm):
+#     class Meta:
+#         model = RecipeStep
+#         fields = ['step_text']
+#         widgets = {'step_text': forms.Textarea(attrs={'rows': 4, 'cols': 80})}
+
+class RecipeStepForm(forms.Form):
+
+    step_text = forms.CharField(
+        max_length=1000,
+        widget=forms.Textarea(attrs={'rows': 4, 'cols': 80})
+    )
 
 
 class IngredientsForm(forms.Form):

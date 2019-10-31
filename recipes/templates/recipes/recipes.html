@@ -2,15 +2,83 @@
 
 {% block content %}
 
-  <ul>
+<!--- Recipe Hero -->
+
+{% if recipes.all %}
+
+{% with hero_recipe=recipes|random %}
+
+<div class="jumbotron jumbotron-fluid" style="background-image: url({{ hero_recipe.img_url }})">
+  <div class="overlay">
+    <div class="container jumbotron-text">
+      <p>Recipe of the day:</p>
+        <br>
+      <a href="{% url 'recipes:recipe_detail' hero_recipe.id %}" class="text-white">
+          <h1 class="display-4">{{ hero_recipe.title }}</h1>
+      </a>
+      <h4>{{ hero_recipe.description | truncatechars:50 }}</h4>
+    </div>
+  </div>
+</div>
+
+{% endwith %}
+
+{% endif %}
+
+
+<!--- Recipe Search -->
+
+<div class="container-fluid">
+  <div class="row search-row">
+  <div class="col-sm-8 col-md-8 col-lg-6 offset-lg-3">
+    <div class="searchbar">
+      <input class="search_input" type="text" name="" placeholder="Search...">
+      <a href="#" class="search_icon"><i class="fas fa-search"></i></a>
+    </div>
+  </div>
+  <div class="col-sm-4 col-md-4 col-lg-3">
+    <a href="{% url 'recipes:new_recipe' %}" style="float: right">
+      <button type="button" class="btn btn-success" style="padding: 15px;">+ New Recipe</button>
+    </a>
+  </div>
+    </div>
+</div>
+
+
+<!--- Recipe Cards -->
+
+
+<div class="container-fluid padding">
+	<div class="row padding">
+
+    {% if recipes.all %}
+
     {% for recipe in recipes %}
-      <li>
-        <img src="{{ recipe.img_url }}" alt="{{ recipe.title }}" height="100" width="100">
-        <h4><a href="{% url 'recipes:recipe_detail' recipe.id %}">{{ recipe }}</a></h4>
-      </li>
-    {% empty %}
-      <li>No recipes have been added yet.</li>
+
+      <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4">
+
+			<div class="card h-100">
+				<a href="{% url 'recipes:recipe_detail' recipe.id %}">
+                  <img class="card-img-top" src="{{ recipe.img_url }}" alt="{{ recipe.title }}">
+                </a>
+				<div class="card-body">
+					<a href="{% url 'recipes:recipe_detail' recipe.id %}">
+                      <h4 class="card-title">{{ recipe.title }}</h4>
+                    </a>
+					<p class="card-text">{{ recipe.description | truncatechars:50 }} ...</p>
+				</div>
+			</div>
+		</div>
+
     {% endfor %}
-  </ul>
+
+    {% else %}
+
+      <p>No recipes have been added yet.</p>
+
+    {% endif %}
+
+    </div>
+</div>
 
 {% endblock %}
