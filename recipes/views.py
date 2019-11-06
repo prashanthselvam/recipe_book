@@ -1,18 +1,17 @@
-import json
-
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.forms import inlineformset_factory, formset_factory
+from django.forms import formset_factory
+from django.db import transaction
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-
 from .models import Recipe, Ingredient, RecipeStep, RecipeIngredient
 from .forms import RecipeForm, IngredientsForm, RecipeStepForm
 from .serializers import RecipeSerializer
+from .controllers import process_recipe_form, process_ingredients_formset, process_recipesteps_formset
 
 
 def index(request):
@@ -47,6 +46,7 @@ def recipe_detail(request, recipe_id):
     return render(request, 'recipes/recipe_detail.html', context)
 
 
+@transaction.atomic
 def new_recipe(request):
     """Create a new recipe on this page"""
     # We're using formsets here to display multiple forms (since we can have multiple steps/ingredients
@@ -56,38 +56,20 @@ def new_recipe(request):
 
     if request.method == 'POST':
 
-        ingredients_formset = IngredientsFormSet(data=request.POST, prefix='ingredient_form')
         recipe_form = RecipeForm(data=request.POST)
+        ingredients_formset = IngredientsFormSet(data=request.POST, prefix='ingredient_form')
+        recipestep_formset = RecipeStepFormSet(data=request.POST, prefix='recipestep_form')
 
-        if recipe_form.is_valid():
+        # Process the input into the recipe form and save the recipe
+        recipe = process_recipe_form(recipe_form)
 
-            recipe = recipe_form.save()
+        # Process the ingredients formset and save to the RecipeIngredients model
+        process_ingredients_formset(ingredients_formset, recipe)
 
-            if ingredients_formset.is_valid():
+        # Process recipe steps formset and save to the RecipeSteps model
+        process_recipesteps_formset(recipestep_formset, recipe)
 
-                existing_ingredients = [ingredient.name for ingredient in Ingredient.objects.all()]
-
-                for ingredient_form in ingredients_formset:
-                    if ingredient_form.cleaned_data.get('ingredient') is not None:
-                        ingredient = ingredient_form.cleaned_data.get('ingredient').title()
-                        quantity = ingredient_form.cleaned_data.get('quantity').title()
-
-                        if ingredient not in existing_ingredients:
-                            ingredient = Ingredient.objects.create(name=ingredient)
-                        else:
-                            ingredient = Ingredient.objects.get(name=ingredient)
-
-                        RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient, ingredient_quantity=quantity)
-
-                recipestep_formset = RecipeStepFormSet(data=request.POST, prefix='recipestep_form')
-
-                if recipestep_formset.is_valid():
-
-                    for step_number, step in enumerate(recipestep_formset, start=1):
-                        step_text = step.cleaned_data.get('step_text')
-                        RecipeStep.objects.create(recipe=recipe, step_number=step_number, step_text=step_text)
-
-                return HttpResponseRedirect(reverse('recipes:recipes'))
+        return HttpResponseRedirect(reverse('recipes:recipes'))
 
     else:
         recipe_form = RecipeForm()

@@ -41,7 +41,7 @@ class RecipeIngredient(models.Model):
 
 
 class RecipeStep(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, related_name='recipe_steps', on_delete=models.CASCADE)
     date_added = models.DateTimeField(auto_now_add=True)
     step_number = models.IntegerField()
     step_text = models.TextField()
