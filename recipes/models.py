@@ -1,8 +1,9 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

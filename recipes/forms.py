@@ -3,16 +3,11 @@ from .models import Recipe, RecipeStep, Ingredient
 
 
 class RecipeForm(forms.ModelForm):
+
     class Meta:
         model = Recipe
         fields = ['title', 'description', 'source_url', 'img_url']
 
-
-# class RecipeStepForm(forms.ModelForm):
-#     class Meta:
-#         model = RecipeStep
-#         fields = ['step_text']
-#         widgets = {'step_text': forms.Textarea(attrs={'rows': 4, 'cols': 80})}
 
 class RecipeStepForm(forms.Form):
 

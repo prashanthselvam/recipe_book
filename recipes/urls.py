@@ -12,7 +12,7 @@ urlpatterns = [
   path('recipes/', views.recipes, name='recipes'),
 
   # Add New Recipe Page (Ingredients form Test)
-  path('new_recipe/', views.new_recipe, name='new_recipe'),
+  path('new_recipe/', views.NewRecipeView.as_view(), name='new_recipe'),
 
   # Recipe Detail Page
   path('recipes/<int:recipe_id>/', views.recipe_detail, name='recipe_detail'),

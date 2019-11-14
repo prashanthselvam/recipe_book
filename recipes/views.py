@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.forms import formset_factory
 from django.db import transaction
+from django.views import View
+
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -35,7 +37,6 @@ def api_recipe_list(request, format=None):
         return Response(serializer.data)
 
 
-
 def recipe_detail(request, recipe_id):
     """View a specific recipe on this page"""
     recipe = Recipe.objects.get(id=recipe_id)
@@ -44,47 +45,6 @@ def recipe_detail(request, recipe_id):
 
     context = {'recipe': recipe, 'steps': steps, 'ingredients': ingredients}
     return render(request, 'recipes/recipe_detail.html', context)
-
-
-@transaction.atomic
-def new_recipe(request):
-    """Create a new recipe on this page"""
-    # We're using formsets here to display multiple forms (since we can have multiple steps/ingredients
-
-    IngredientsFormSet = formset_factory(IngredientsForm)
-    RecipeStepFormSet = formset_factory(RecipeStepForm)
-
-    if request.method == 'POST':
-
-        recipe_form = RecipeForm(data=request.POST)
-        ingredients_formset = IngredientsFormSet(data=request.POST, prefix='ingredient_form')
-        recipestep_formset = RecipeStepFormSet(data=request.POST, prefix='recipestep_form')
-
-        # Process the input into the recipe form and save the recipe
-        recipe = process_recipe_form(recipe_form)
-
-        # Process the ingredients formset and save to the RecipeIngredients model
-        process_ingredients_formset(ingredients_formset, recipe)
-
-        # Process recipe steps formset and save to the RecipeSteps model
-        process_recipesteps_formset(recipestep_formset, recipe)
-
-        return HttpResponseRedirect(reverse('recipes:recipes'))
-
-    else:
-        recipe_form = RecipeForm()
-        ingredients_formset = IngredientsFormSet(prefix='ingredient_form')
-        recipestep_formset = RecipeStepFormSet(prefix='recipestep_form')
-        ingredientslist = [ingredient.name for ingredient in Ingredient.objects.all()]
-
-    context = {
-        'recipe_form': recipe_form,
-        'ingredients_formset': ingredients_formset,
-        'recipestep_formset': recipestep_formset,
-        'ingredientslist': ingredientslist
-    }
-
-    return render(request, 'recipes/new_recipe.html', context)
 
 
 @api_view(['GET'])
@@ -98,3 +58,41 @@ def api_recipe_detail(request, pk, format=None):
     if request.method == 'GET':
         serializer = RecipeSerializer(recipe)
         return Response(serializer.data)
+
+
+class NewRecipeView(View):
+    IngredientsFormSet = formset_factory(IngredientsForm)
+    RecipeStepFormSet = formset_factory(RecipeStepForm)
+
+    def get(self, request):
+        recipe_form = RecipeForm()
+        ingredients_formset = self.IngredientsFormSet(prefix='ingredient_form')
+        recipestep_formset = self.RecipeStepFormSet(prefix='recipestep_form')
+        ingredientslist = [ingredient.name for ingredient in Ingredient.objects.all()]
+
+        context = {
+            'recipe_form': recipe_form,
+            'ingredients_formset': ingredients_formset,
+            'recipestep_formset': recipestep_formset,
+            'ingredientslist': ingredientslist
+        }
+
+        return render(request, 'recipes/new_recipe.html', context)
+
+    @transaction.atomic
+    def post(self, request):
+        recipe_form = RecipeForm(data=request.POST)
+        ingredients_formset = self.IngredientsFormSet(data=request.POST, prefix='ingredient_form')
+        recipestep_formset = self.RecipeStepFormSet(data=request.POST, prefix='recipestep_form')
+
+        # Process the input into the recipe form and save the recipe
+        recipe = process_recipe_form(recipe_form)
+
+        # Process the ingredients formset and save to the RecipeIngredients model
+        process_ingredients_formset(ingredients_formset, recipe)
+
+        # Process recipe steps formset and save to the RecipeSteps model
+        process_recipesteps_formset(recipestep_formset, recipe)
+
+        return HttpResponseRedirect(reverse('recipes:recipes'))
+
