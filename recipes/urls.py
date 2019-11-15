@@ -18,10 +18,13 @@ urlpatterns = [
   path('recipes/<int:recipe_id>/', views.recipe_detail, name='recipe_detail'),
 
   # Recipes API
-  path('api/recipes/', views.api_recipe_list, name='api_recipe_list'),
+  path('api/recipes/', views.api_recipe, name='api_recipe'),
 
   # Recipe Detail API
-  path('api/recipes/<int:pk>/', views.api_recipe_detail, name='api_recipe_detail')
+  path('api/recipes/<int:pk>/', views.api_recipe_detail, name='api_recipe_detail'),
+
+  # Ingredients API
+  path('api/ingredient/', views.api_ingredient, name='api_ingredient'),
 
 ]
 

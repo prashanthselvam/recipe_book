@@ -1,18 +1,20 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.forms import formset_factory
 from django.db import transaction
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.parsers import JSONParser
 
 from .models import Recipe, Ingredient, RecipeStep, RecipeIngredient
 from .forms import RecipeForm, IngredientsForm, RecipeStepForm
-from .serializers import RecipeSerializer
+from .serializers import ListRecipeSerializer, IngredientSerializer
 from .controllers import process_recipe_form, process_ingredients_formset, process_recipesteps_formset
 
 
@@ -28,13 +30,48 @@ def recipes(request):
     return render(request, 'recipes/recipes.html', context)
 
 
-@api_view(['GET'])
-def api_recipe_list(request, format=None):
+@api_view(['GET', 'POST'])
+def api_ingredient(request, format=None):
+    if request.method == 'GET':
+        ingredients = Ingredient.objects.all()
+        serializer = IngredientSerializer(ingredients, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        data = request.data
+        serializer = IngredientSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+
+@api_view(['GET', 'POST'])
+def api_recipe(request, format=None):
     """List all recipes in the app via API"""
     if request.method == 'GET':
         recipes = Recipe.objects.all()
-        serializer = RecipeSerializer(recipes, many=True)
+        serializer = ListRecipeSerializer(recipes, many=True)
         return Response(serializer.data)
+
+    elif request.method == 'POST':
+        pass
+
+        # TODO: really having trouble with this
+
+        # serializer = CreateRecipeSerializer()
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return JsonResponse(serializer.data, status=201)
+        # print(serializer.errors)
+        # return JsonResponse(serializer.errors, status=400)
+        # serializer = RecipeSerializer(data=data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return JsonResponse(serializer.data, status=201)
+        # print(serializer.errors)
+        # return JsonResponse(serializer.errors, status=400)
 
 
 def recipe_detail(request, recipe_id):
@@ -56,7 +93,7 @@ def api_recipe_detail(request, pk, format=None):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = RecipeSerializer(recipe)
+        serializer = ListRecipeSerializer(recipe)
         return Response(serializer.data)
 
 
