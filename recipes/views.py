@@ -4,13 +4,10 @@ from django.urls import reverse
 from django.forms import formset_factory
 from django.db import transaction
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
-
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework.parsers import JSONParser
 
 from .models import Recipe, Ingredient, RecipeStep, RecipeIngredient
 from .forms import RecipeForm, IngredientsForm, RecipeStepForm
@@ -46,7 +43,6 @@ def api_ingredient(request, format=None):
         return JsonResponse(serializer.errors, status=400)
 
 
-
 @api_view(['GET', 'POST'])
 def api_recipe(request, format=None):
     """List all recipes in the app via API"""
@@ -56,22 +52,13 @@ def api_recipe(request, format=None):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        pass
-
-        # TODO: really having trouble with this
-
-        # serializer = CreateRecipeSerializer()
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return JsonResponse(serializer.data, status=201)
-        # print(serializer.errors)
-        # return JsonResponse(serializer.errors, status=400)
-        # serializer = RecipeSerializer(data=data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return JsonResponse(serializer.data, status=201)
-        # print(serializer.errors)
-        # return JsonResponse(serializer.errors, status=400)
+        data = request.data
+        serializer = ListRecipeSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        print(serializer.errors)
+        return JsonResponse(serializer.errors, status=400)
 
 
 def recipe_detail(request, recipe_id):

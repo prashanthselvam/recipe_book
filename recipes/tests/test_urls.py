@@ -5,6 +5,8 @@ from recipes.views import index, recipes, recipe_detail, NewRecipeView, api_reci
 
 class TestUrls(SimpleTestCase):
 
+
+
     def test_index_is_resolved(self):
         url = reverse('recipes:index')
         self.assertEquals(resolve(url).func, recipes)
